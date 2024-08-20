@@ -106,18 +106,8 @@ class Dados
 		}
 		return [implode(',',$sets),$values];
 	}
-	
-	public function queryRow($q)
-	{
-		return $this->consultar($q);
-	}
 
-	public function queryAll($q)
-	{
-		return $this->consultar($q, 1);
-	}
-	
-	public function consultar($q, $all = false)
+	public function consultar($q, $tudo = true)
 	{
 		if ($stmt = $this->sqlExec($q)) {
 			if ($affected = $stmt->rowCount()) {
