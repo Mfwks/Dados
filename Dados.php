@@ -20,9 +20,15 @@ class Dados
 {
 	private $conex;
 	
-	public function __construct($conex)
+	public function __construct($conex, $arg = [])
 	{
 		$this->conex = $conex;
+		$this->config($arg);
+	}
+	
+	protected function config($arg)
+	{
+		# Configurações adicionais do projeto: implementar nas classes estendidas
 	}
 	
 	public function inserir($t,$vs,$e)
