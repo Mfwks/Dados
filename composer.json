@@ -1,0 +1,14 @@
+{
+    "name": "mfwks/legacy",
+    "description": "Solução genérica para projetos legados",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eskelsen",
+            "email": "dev@microframeworks.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
