@@ -8,7 +8,7 @@ namespace Mfwks;
  * 
  * Dados
  * 
- * Solução universal de consulta SQL para projetos legados.
+ * Solução genérica para projetos legados.
  *
  * Microframeworks <eskelsen@microframeworks.com>
  *
@@ -31,6 +31,36 @@ class Dados
 		# Configurações adicionais do projeto: implementar nas classes estendidas
 	}
 	
+	public function tabela($t)
+	{
+		$ok = $this->query("SHOW TABLES LIKE '$t';");
+		if (!is_array($ok)) {
+			return false;
+		}
+		$stmt = $this->sqlExec("DESCRIBE $t");
+		$data = $stmt ? $stmt->fetchAll() : false;
+		return $data ? array_column($data,'Field') : false;
+	}
+
+	public function cabecalhos($t)
+	{
+		if ($f = $this->tab($t)) {
+			return implode(',',$f);
+		}
+		return false;
+	}
+
+	public function rotulos($t,$key,$value,$cond = null,$v = false)
+	{
+		if (!$cols = $this->selectAll($t,"$key,$value",$cond,$v)) {
+			return null;
+		}
+		foreach ($cols as $row) {
+			$n[$row[$key]] = $row[$value];
+		}
+		return $n ?? null;
+	}
+	
 	public function inserir($t,$vs)
 	{
 		[$f,$v] = $this->fieldsValues($vs);
@@ -39,7 +69,7 @@ class Dados
 		return $stmt ? $this->conex->lastInsertId() : false;
 	}
 
-	public function fieldsValues($in)
+	private function fieldsValues($in)
 	{
 		return [
 			0 => implode(',',array_keys($in)),
@@ -82,7 +112,7 @@ class Dados
 		return $this->selectThing($t,$f,'SUM',$cond,$v);
 	}
 
-	public function selectThing($t,$f,$op,$cond = null,$v = false)
+	private function selectThing($t,$f,$op,$cond = null,$v = false)
 	{
 		$field = "$op($f)";
 		$stmt = $this->sqlExec("SELECT $field FROM $t $cond;",$v);
@@ -116,6 +146,12 @@ class Dados
 			return true;
 		}
 		return false;
+	}
+	
+	public function excluir($t,$c,$v = [])
+	{
+		$stmt = $this->sqlExec("DELETE FROM $t WHERE $c;",$v);
+		return $stmt ? $stmt->rowCount() : false;
 	}
 	
 	private function sqlExec($sql,$v = false)
