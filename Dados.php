@@ -31,7 +31,7 @@ class Dados
 		# Configurações adicionais do projeto: implementar nas classes estendidas
 	}
 	
-	public function inserir($t,$vs,$e)
+	public function inserir($t,$vs)
 	{
 		[$f,$v] = $this->fieldsValues($vs);
 		$h      = implode(',',array_fill(0,count($v),'?'));
@@ -121,7 +121,11 @@ class Dados
 	private function sqlExec($sql,$v = false)
 	{
 		$stmt = $this->conex->prepare($sql);
-		$made = $v ? $stmt->execute($v) : $stmt->execute();
-		return $made ? $stmt : false;
+		try {
+			$made = $v ? $stmt->execute($v) : $stmt->execute();
+			return $made ? $stmt : false;
+		} catch (PDOException $e) {
+			exit('Falha na requisição ao banco de dados: ' . $e->getMessage());
+		}
 	}
 }
