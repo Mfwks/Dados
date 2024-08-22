@@ -2,6 +2,8 @@
 
 namespace Mfwks;
 
+use PDO;
+
 /**
  * 
  * [Helper]
@@ -12,13 +14,13 @@ namespace Mfwks;
  *
  * Microframeworks <eskelsen@microframeworks.com>
  *
- * Este código está licenciado sob a MIT License.
+ * Este código está sob a MIT License.
  * 
  */
 
 class Dados
 {
-	private $conex;
+	private PDO $conex;
 	
 	public function __construct($conex, $arg = [])
 	{
