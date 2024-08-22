@@ -6,7 +6,7 @@ namespace Mfwks\Legacy;
  * 
  * [Helper]
  * 
- * Forms
+ * Form
  * 
  * Solução genérica para projetos legados.
  *
@@ -16,7 +16,7 @@ namespace Mfwks\Legacy;
  * 
  */
 
-class Forms
+class Form
 {
 	public static function info()
 	{
