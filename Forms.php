@@ -23,11 +23,11 @@ class Forms
 		exit('Esta classe pertence ao repositório Legacy em https://github.com/Mfwks/Legacy' . PHP_EOL);
 	}
 	
-   /*
+	/*
 	* Controle de formulário
 	*/
 	
-	public static function iniciar(): void
+	public static function iniciar()
 	{
 		$base_ctrl = $_SESSION['form_ctrl'] ?? null;
 		$form_ctrl = $_REQUEST['form_ctrl'] ?? null;
@@ -35,18 +35,18 @@ class Forms
 		$_SESSION['form_true'] = ($form_ctrl AND $base_ctrl) ? $form_ctrl===$base_ctrl : false;
 	}
 	
-	public static function validar(): bool
+	public static function validar()
 	{
 		return $_SESSION['form_true'] ?? false;
 	}
 
-	public static function input(): string
+	public static function input()
 	{
 		$form_ctrl = $_SESSION['form_ctrl'] ?? 'Form: controle de formulário não iniciado';
 		return '<input type="hidden" id="form_ctrl" name="form_ctrl" value="' . $form_ctrl . '">' . "\n";
 	}
 	
-   /*
+	/*
 	* Métodos de tratamento
 	*/
 
@@ -94,7 +94,7 @@ class Forms
 		return trim($in);
 	}
 
-   /*
+	/*
 	* Métodos de máscaras
 	*/
 
