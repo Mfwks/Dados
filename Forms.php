@@ -10,6 +10,8 @@ namespace Mfwks\Legacy;
  * 
  * Solução genérica para projetos legados.
  *
+ * https://github.com/Mfwks/Legacy
+ *
  * Microframeworks <eskelsen@microframeworks.com>
  *
  * Este código está sob a MIT License.
@@ -38,6 +40,12 @@ class Form
 	public static function validar()
 	{
 		return $_SESSION['form_true'] ?? false;
+	}
+	
+	public static function codigo()
+	{
+		$form_ctrl = $_SESSION['form_ctrl'] ?? false;
+		return ($form_ctrl) ? '&form_ctrl=' . $form_ctrl : false;
 	}
 
 	public static function input()

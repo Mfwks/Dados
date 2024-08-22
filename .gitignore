@@ -1,3 +1,5 @@
 /vendor/
 
 test.php
+conex.php
+errors.log
