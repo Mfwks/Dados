@@ -1,6 +1,6 @@
 <?php
 
-namespace Mfwks;
+namespace Mfwks\Legacy;
 
 use PDO;
 
