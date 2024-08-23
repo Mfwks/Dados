@@ -12,6 +12,8 @@ use PDO;
  * 
  * Solução genérica para projetos legados.
  *
+ * https://github.com/Mfwks/Legacy
+ *
  * Microframeworks <eskelsen@microframeworks.com>
  *
  * Este código está sob a MIT License.
