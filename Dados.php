@@ -2,6 +2,8 @@
 
 namespace Mfwks\Legacy;
 
+use PDO;
+
 /**
  * 
  * [Helper]
@@ -9,8 +11,6 @@ namespace Mfwks\Legacy;
  * Dados
  * 
  * Solução genérica para projetos legados.
- *
- * https://github.com/Mfwks/Legacy
  *
  * Microframeworks <eskelsen@microframeworks.com>
  *
@@ -20,28 +20,41 @@ namespace Mfwks\Legacy;
 
 class Dados
 {
-	public static function tabela($t)
+	private PDO $conex;
+	
+	public function __construct(PDO $conex, $options = [])
 	{
-		$ok = self::consultar("SHOW TABLES LIKE '$t';");
+		$this->conex = $conex;
+		$this->config($options);
+	}
+	
+	protected function config($options)
+	{
+		# Configurações adicionais do projeto: implementar nas classes estendidas
+	}
+	
+	public function tabela($t)
+	{
+		$ok = $this->consultar("SHOW TABLES LIKE '$t';");
 		if (!is_array($ok)) {
 			return false;
 		}
-		$stmt = self::sqlExec("DESCRIBE $t");
+		$stmt = $this->executar("DESCRIBE $t");
 		$data = $stmt ? $stmt->fetchAll() : false;
 		return $data ? array_column($data,'Field') : false;
 	}
 
-	public static function cabecalhos($t)
+	public function cabecalhos($t)
 	{
-		if ($f = self::tabela($t)) {
+		if ($f = $this->tabela($t)) {
 			return implode(',',$f);
 		}
 		return false;
 	}
 
-	public static function rotulos($t,$key,$value,$cond = null,$v = false)
+	public function rotulos($t,$key,$value,$cond = null,$v = false)
 	{
-		if (!$cols = self::todos($t,"$key,$value",$cond,$v)) {
+		if (!$cols = $this->todos($t,"$key,$value",$cond,$v)) {
 			return null;
 		}
 		foreach ($cols as $row) {
@@ -50,16 +63,15 @@ class Dados
 		return $n ?? null;
 	}
 	
-	public static function inserir($t,$vs)
+	public function inserir($t,$vs)
 	{
-		global $conex;
-		[$f,$v] = self::fieldsValues($vs);
+		[$f,$v] = $this->preparar($vs);
 		$h      = implode(',',array_fill(0,count($v),'?'));
-		$stmt   = self::sqlExec("INSERT INTO $t ($f) VALUES ($h);",$v);
-		return $stmt ? $conex->lastInsertId() : false;
+		$stmt   = $this->executar("INSERT INTO $t ($f) VALUES ($h);",$v);
+		return $stmt ? $this->conex->lastInsertId() : false;
 	}
 
-	private static function fieldsValues($in)
+	private function preparar($in)
 	{
 		return [
 			0 => implode(',',array_keys($in)),
@@ -67,58 +79,58 @@ class Dados
 		];
 	}
 	
-	public static function campo($t,$f,$cond = null,$v = false)
+	public function campo($t,$f,$cond = null,$v = false)
 	{
-		$stmt = self::sqlExec("SELECT $f FROM $t $cond;",$v);
+		$stmt = $this->executar("SELECT $f FROM $t $cond;",$v);
 		return $stmt ? $stmt->fetchColumn() : false;
 	}
 
-	public static function linha($t,$f = '*',$cond = null,$v = false)
+	public function linha($t,$f = '*',$cond = null,$v = false)
 	{
-		$stmt = self::sqlExec("SELECT $f FROM $t $cond;",$v);
+		$stmt = $this->executar("SELECT $f FROM $t $cond;",$v);
 		return $stmt ? $stmt->fetch() : false;
 	}
 
-	public static function coluna($t,$f,$cond = null,$v = false)
+	public function coluna($t,$f,$cond = null,$v = false)
 	{
-		$stmt = self::sqlExec("SELECT $f FROM $t $cond;",$v);
+		$stmt = $this->executar("SELECT $f FROM $t $cond;",$v);
 		$data = $stmt ? $stmt->fetchAll() : false;
 		return $data ? array_column($data,$f) : false;
 	}
 
-	public static function todos($t,$f = '*',$cond = null,$v = false)
+	public function todos($t,$f = '*',$cond = null,$v = false)
 	{
-		$stmt = self::sqlExec("SELECT $f FROM $t $cond;",$v);
+		$stmt = $this->executar("SELECT $f FROM $t $cond;",$v);
 		return $stmt ? $stmt->fetchAll() : false;
 	}
 
-	public static function quantos($t,$f = '*',$cond = null,$v = false)
+	public function quantos($t,$f = '*',$cond = null,$v = false)
 	{
-		return self::selectThing($t,$f,'COUNT',$cond,$v);
+		return $this->contar($t,$f,'COUNT',$cond,$v);
 	}
 
-	public static function somar($t,$f = '*',$cond = null,$v = false)
+	public function somar($t,$f = '*',$cond = null,$v = false)
 	{
-		return self::selectThing($t,$f,'SUM',$cond,$v);
+		return $this->contar($t,$f,'SUM',$cond,$v);
 	}
 
-	private static function selectThing($t,$f,$op,$cond = null,$v = false)
+	private function contar($t,$f,$op,$cond = null,$v = false)
 	{
 		$field = "$op($f)";
-		$stmt = self::sqlExec("SELECT $field FROM $t $cond;",$v);
+		$stmt = $this->executar("SELECT $field FROM $t $cond;",$v);
 		$n = $stmt ? $stmt->fetch() : false;
 		return (isset($n[$field])) ? $n[$field] : false;
 	}
 
-	public static function atualizar($t,$a,$c,$cvs = [])
+	public function atualizar($t,$a,$c,$cvs = [])
 	{
-		[$f,$fvs] = self::parameterfy($a);
+		[$f,$fvs] = $this->parametrizar($a);
 		$vs = array_merge($fvs,$cvs);
-		$stmt = self::sqlExec("UPDATE $t SET $f WHERE $c;",$vs);
+		$stmt = $this->executar("UPDATE $t SET $f WHERE $c;",$vs);
 		return $stmt ? $stmt->rowCount() : false;
 	}
 	
-	private static function parameterfy($array)
+	private function parametrizar($array)
 	{
 		foreach ($array as $field => $value) {
 			$sets[] = "$field=?";
@@ -127,9 +139,9 @@ class Dados
 		return [implode(',',$sets),$values];
 	}
 
-	public static function consultar($q, $tudo = true)
+	public function consultar($q, $tudo = true)
 	{
-		if ($stmt = self::sqlExec($q)) {
+		if ($stmt = $this->executar($q)) {
 			if ($affected = $stmt->rowCount()) {
 				return $all ? $stmt->fetchAll() : $stmt->fetch();
 			}
@@ -138,16 +150,15 @@ class Dados
 		return false;
 	}
 	
-	public static function excluir($t,$c,$v = [])
+	public function excluir($t,$c,$v = [])
 	{
-		$stmt = self::sqlExec("DELETE FROM $t WHERE $c;",$v);
+		$stmt = $this->executar("DELETE FROM $t WHERE $c;",$v);
 		return $stmt ? $stmt->rowCount() : false;
 	}
 	
-	private static function sqlExec($sql,$v = false)
+	private function executar($sql,$v = false)
 	{
-		global $conex;
-		$stmt = $conex->prepare($sql);
+		$stmt = $this->conex->prepare($sql);
 		try {
 			$made = $v ? $stmt->execute($v) : $stmt->execute();
 			return $made ? $stmt : false;
